@@ -390,7 +390,7 @@ void mainWindow::setSoundFile() {
     char cwd[1000];
     getcwd(cwd, 1000);
     audioFile = QFileDialog::getOpenFileName(this, "Choose file", 
-             cwd, "Audios (*.wav *.au *.aiff)");
+             cwd, "Audios (*.mp3 *.wav *.au *.aiff)");
     soundFileLine->setText(audioFile);
 }
 
