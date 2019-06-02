@@ -24,5 +24,5 @@ class AudioPlayer {
 		int stop();
 	protected:
 		GstElement *pipeline;
-		GstElement *decoder, *converter, *sink;
+		// GstElement *decoder, *converter, *sink; // Not used
 };

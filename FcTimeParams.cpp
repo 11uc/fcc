@@ -138,4 +138,5 @@ bool FcTimeParams::load(const vector<QLineEdit *> &tl, const QString &workDir) {
         cout << "Error: unable to open file." << endl;
         return false;
     }
+    return true;
 }

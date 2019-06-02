@@ -7,7 +7,6 @@ FcExperiment::FcExperiment(hardware *hw, FcTimeParams *tp, frameCatcher *fc,
     timer->setSingleShot(true);
     record = nullptr;
     splayer = nullptr;
-    // playlist = nullptr;
     expType = habituation;
     recType = continuous;
     stat = exp;
@@ -20,10 +19,6 @@ FcExperiment::~FcExperiment() {
         delete record;
     if (splayer != nullptr) 
         delete splayer;
-	/*
-    if (playlist != nullptr) 
-        delete playlist;
-	*/
     if (shockPin != nullptr) 
         delete shockPin;
     if (cueSigPin != nullptr) 
@@ -73,7 +68,6 @@ void FcExperiment::run(QString ofile, int fr, const vector<int> &res, bool modif
             cout << "cue" << endl;
             // start play cue sound
             splayer->play();
-            // gpioWrite(hwParam->getCueSigPinId(), 1);
 			cueSigPin->write(1);
             stat = shock;
             timer->start((int) ((tmParam["cue"] + hwParam->getAudioDelay())* 1000));
@@ -82,8 +76,7 @@ void FcExperiment::run(QString ofile, int fr, const vector<int> &res, bool modif
             cout << "shock" << endl;
             if (expType == conditioning) {
                 // start the shock
-                // gpioWrite(hwParam->getShockPinId(), 0);
-				shockPin->write(1);
+				shockPin->write(0);
             }
             if (fr == 0) {
                 stat = off;
@@ -97,12 +90,10 @@ void FcExperiment::run(QString ofile, int fr, const vector<int> &res, bool modif
             cout << "iti" << endl;
             // stop the cue
             splayer->stop();
-            // gpioWrite(hwParam->getCueSigPinId(), 0);
 			cueSigPin->write(0);
             if (expType == conditioning) {
                 // stop the shock
-                // gpioWrite(hwParam->getShockPinId(), 0);
-				shockPin->write(0)
+				shockPin->write(1);
             }
             stat = recType == continuous ? cue : itiOff;
             if (recType == continuous) {
@@ -140,11 +131,10 @@ void FcExperiment::run(QString ofile, int fr, const vector<int> &res, bool modif
             if (expType != habituation) {
                 // turn off the cue 
                 splayer->stop();
-                // gpioWrite(hwParam->getCueSigPinId(), 0);
 				cueSigPin->write(0);
                 if (expType == conditioning) {
                     // turn off the shock
-                    // gpioWrite(hwParam->getShockPinId(), 0);
+                    shockPin->write(1);
                 }
             }
             stat = restOff;
@@ -177,27 +167,10 @@ void FcExperiment::start(QString ofile, int fr, const vector<int> &res,
         const QString &audioFile, bool modify) {
     if (expType != habituation) {
         // setup audio file
-		/*
-        splayer = new QMediaPlayer(this, QMediaPlayer::LowLatency);
-        playlist = new QMediaPlaylist(this);
-        if (!playlist->addMedia(QUrl::fromLocalFile(audioFile))) {
-            cout << "Error, cannot load audio file." << endl;
-            return;
-        }
-        playlist->setPlaybackMode(QMediaPlaylist::Loop);
-        splayer->setPlaylist(playlist);
-		*/
 		splayer = new AudioPlayer(audioFile);
         // setup gpio
 		cueSigPin = new GPIO(hwParam->getCueSigPinId(), GPIO::out);
-		shockPin = new GPIO(hwParam->getShockPinId(), GPIO::out);
-        /*
-        gpioInitialise();
-        if (gpioSetMode(hwParam->getCueSigPinId, PI_OUTPUT) ||
-            gpioSetMode(hwParam->getShockPinId, PI_OUTPUT)) {
-            cout << "Error, cannot initialize GPIO." << endl;
-        }
-        */
+		shockPin = new GPIO(hwParam->getShockPinId(), GPIO::out, 1);
     }
     stat = exp;
     connect(timer, &QTimer::timeout, [=] () {run(ofile, fr, res, modify);});
@@ -209,19 +182,14 @@ void FcExperiment::stop() {
         case iti: case rest:
             if (expType == conditioning) {
                 // stop the shock
-                // gpioWrite(hwParam->getShockPinId(), 1);
-				shockPin->write(0);
+				shockPin->write(1);
             }
         case shock:
             if (expType != habituation) {
                 splayer->stop();
-                // gpioWrite(hwParam->getCueSigPinId(), 0);
 				cueSigPin->write(0);
                 delete splayer;
-                // delete playlist;
                 splayer = nullptr;
-                // playlist = nullptr;
-                // gpioTerminate();
 				delete cueSigPin;
 				delete shockPin;
 				shockPin = cueSigPin = nullptr;
@@ -248,26 +216,9 @@ void FcExperiment::stop() {
 void FcExperiment::testSigStim(const QString &audioFile) {
     // setup audio file
 	splayer = new AudioPlayer(audioFile);
-	/*
-    splayer = new QMediaPlayer(this, QMediaPlayer::LowLatency);
-    playlist = new QMediaPlaylist(this);
-    if (!playlist->addMedia(QUrl::fromLocalFile(audioFile))) {
-        cout << "Error, cannot load audio file." << endl;
-        return;
-    }
-    playlist->setPlaybackMode(QMediaPlaylist::Loop);
-    splayer->setPlaylist(playlist);
-	*/
-    /*
-    setup gpio
-    gpioInitialise();
-    if (gpioSetMode(hwParam->getCueSigPinId, PI_OUTPUT) ||
-        gpioSetMode(hwParam->getShockPinId, PI_OUTPUT)) {
-        cout << "Error, cannot initialize GPIO." << endl;
-    }
-    */
+    // Setup GPIO
 	cueSigPin = new GPIO(hwParam->getCueSigPinId(), GPIO::out);
-	shockPin = new GPIO(hwParam->getShockPinId(), GPIO::out);
+	shockPin = new GPIO(hwParam->getShockPinId(), GPIO::out, 1);
     stat = cue;
     vector<int> tmp(2, 0);
     connect(timer, &QTimer::timeout, [=] () {run("", 0, tmp, false);});
@@ -278,17 +229,12 @@ void FcExperiment::stopTest() {
     switch (stat) {
         case off:
             // stop the shock
-            // gpioWrite(hwParam->getShockPinId(), 1);
-			shockPin->write(0);
+			shockPin->write(1);
         default:
             splayer->stop();
-            // gpioWrite(hwParam->getCueSigPinId(), 0);
 			cueSigPin->write(0);
             delete splayer;
-            // delete playlist;
             splayer = nullptr;
-            //playlist = nullptr;
-            // gpioTerminate();
 			delete cueSigPin;
 			delete shockPin;
 			shockPin = cueSigPin = nullptr;

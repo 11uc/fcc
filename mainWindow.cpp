@@ -316,7 +316,10 @@ void mainWindow::testSigStim() {
     startBtn->setDisabled(true);
     testBtn->setDisabled(true);
     repaint();
+    timeParams->update(timelines, false);  // update time parameters
     ex = new FcExperiment(hwParam, timeParams, frCat, imgProc);
+    ex->setType((FcExperiment::experimentType) expTypeCB->currentIndex(),
+            (FcExperiment::recordType) recordTypeCB->currentIndex());
     connect(ex, &FcExperiment::stopped, this, &mainWindow::stopTest);
     connect(stopBtn, &QPushButton::clicked, ex, &FcExperiment::stopTest);
     ex->testSigStim(audioFile); 
