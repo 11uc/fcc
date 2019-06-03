@@ -7,6 +7,8 @@ FcExperiment::FcExperiment(hardware *hw, FcTimeParams *tp, frameCatcher *fc,
     timer->setSingleShot(true);
     record = nullptr;
     splayer = nullptr;
+    shockPin = nullptr;
+    cueSigPin = nullptr;
     expType = habituation;
     recType = continuous;
     stat = exp;

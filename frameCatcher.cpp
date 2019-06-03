@@ -27,6 +27,7 @@ void frameCatcher::run() {
             cerr << "ERROR: Can't grab camera frame." << endl;
             break;
         }
+        cvtColor(frame, frame, CV_BGR2RGB);
         emit frameCaptured(frame);
         mutex->lock();
         if (stopSig) {

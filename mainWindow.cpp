@@ -261,7 +261,6 @@ void mainWindow::stopDisplay(int state) {
 }
 
 void mainWindow::displayFrame(Mat img) {
-    cvtColor(img, img, CV_BGR2RGB);
     if (modifyCheck->isChecked()) {
         imgProc->process(img);
     }
@@ -281,7 +280,7 @@ void mainWindow::startEx() {  // start the experiment
     }
     vector<int> rs(resolutions[resolutionCB->currentIndex()]);
     QString outputFile(workDir + "/FC_" + animalNumLine->text() + '_' +
-            sessionNumLine->text());
+            sessionNumLine->text() + '_' + expTypeCB->currentText());
     // change UI
     stopBtn->setDisabled(false);
     startBtn->setDisabled(true);
