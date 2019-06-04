@@ -10,13 +10,14 @@ Modified: 2018/10/31
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
 #include <QTimer>
-// #include <pigpio.h>
+#include <pigpio.h>
 
 #include "hardware.h"
 #include "FcTimeParams.h"
 #include "recorder.h"
 #include "frameCatcher.h"
 #include "imageProcessor.h"
+#include "audioPlayer.h"
 
 class FcExperiment : public QObject {
     Q_OBJECT
@@ -41,8 +42,9 @@ class FcExperiment : public QObject {
         frameCatcher *fcat;  // Capture camera frames
         QTimer *timer;  // Timer used to control time of each period
         recorder *record;  // Video recorder object
-        QMediaPlayer *splayer;  // audio sound player
-        QMediaPlaylist *playlist;  // audio file list
+        // QMediaPlayer *splayer;  // audio sound player
+        // QMediaPlaylist *playlist;  // audio file list
+		AudioPlayer splayer;
         imageProcessor *imgProc;  // processing image
         experimentType expType;  // Experiment type, habituation/conditioning/testing
         recordType recType;  // Recording type, continuous/episodic
@@ -51,6 +53,7 @@ class FcExperiment : public QObject {
         double recExp;  // time of exploration recorded
         double recIti;  // time of inter-trial interval recorded
         double unrecRest;  // time of unrecorded rest
+		GPIO *cueSigPin, *shockPin;  // GPIO controlling classes for shock
 
     public slots:
         // run the experiment
