@@ -261,7 +261,6 @@ void mainWindow::stopDisplay(int state) {
 }
 
 void mainWindow::displayFrame(Mat img) {
-    cvtColor(img, img, CV_BGR2RGB);
     if (modifyCheck->isChecked()) {
         imgProc->process(img);
     }
@@ -281,7 +280,7 @@ void mainWindow::startEx() {  // start the experiment
     }
     vector<int> rs(resolutions[resolutionCB->currentIndex()]);
     QString outputFile(workDir + "/FC_" + animalNumLine->text() + '_' +
-            sessionNumLine->text());
+            sessionNumLine->text() + '_' + expTypeCB->currentText());
     // change UI
     stopBtn->setDisabled(false);
     startBtn->setDisabled(true);
@@ -316,7 +315,10 @@ void mainWindow::testSigStim() {
     startBtn->setDisabled(true);
     testBtn->setDisabled(true);
     repaint();
+    timeParams->update(timelines, false);  // update time parameters
     ex = new FcExperiment(hwParam, timeParams, frCat, imgProc);
+    ex->setType((FcExperiment::experimentType) expTypeCB->currentIndex(),
+            (FcExperiment::recordType) recordTypeCB->currentIndex());
     connect(ex, &FcExperiment::stopped, this, &mainWindow::stopTest);
     connect(stopBtn, &QPushButton::clicked, ex, &FcExperiment::stopTest);
     ex->testSigStim(audioFile); 
